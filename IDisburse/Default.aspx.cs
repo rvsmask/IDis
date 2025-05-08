@@ -13,5 +13,11 @@ namespace IDisburse
         {
 
         }
+
+        public void DisplayUploadedData(DataTable dtEmp)
+{
+    GridEmp.DataSource = dtEmp;
+    GridEmp.DataBind();
+}
     }
 }
