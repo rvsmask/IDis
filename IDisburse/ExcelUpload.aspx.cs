@@ -1,3 +1,4 @@
+using log4net;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -17,10 +18,60 @@ namespace IDisburse
     {
         string connectionString = "";// ConfigurationManager.ConnectionStrings["Ginie"].ConnectionString;
         private object worksheet;
-
+        private static readonly ILog log = LogManager.GetLogger(typeof(ExcelUpload));
         protected void Page_Load(object sender, EventArgs e)
         {
+            log.Info("Upload button clicked.");
+            if (fileExcel.HasFile)
+            {
+                string fileExtension = Path.GetExtension(fileExcel.FileName).ToLower();
 
+                string strFileName = $"{DateTime.Now:dd_MM_yyyy_HH_mm}_{fileExcel.FileName}";
+                string filePath = Server.MapPath("~/Upload/" + strFileName);
+                fileExcel.SaveAs(filePath);
+
+                if (fileExtension == ".csv")
+                {
+                    DataTable dt = ReadCsvFile(filePath);
+                   // InsertDataToDatabase(dt);
+                }
+                else if (fileExtension == ".xlsx" || fileExtension == ".xls")
+                {
+                    DataTable dt = ReadExcelFile(filePath);
+                   // InsertDataToDatabase(dt);
+                }
+            }
+        }
+
+
+        private DataTable ReadCsvFile(string filePath)
+        {
+            DataTable dt = new DataTable();
+
+            using (StreamReader sr = new StreamReader(filePath))
+            {
+                bool isFirstRow = true;
+                while (!sr.EndOfStream)
+                {
+                    string line = sr.ReadLine();
+                    string[] fields = line.Split(',');
+
+                    if (isFirstRow)
+                    {
+                        foreach (string field in fields)
+                        {
+                            dt.Columns.Add(field.Trim());
+                        }
+                        isFirstRow = false;
+                    }
+                    else
+                    {
+                        dt.Rows.Add(fields);
+                    }
+                }
+            }
+
+            return dt;
         }
 
 
