@@ -71,3 +71,9 @@ protected void Page_Load(object sender, EventArgs e)
 
     BindGrid(); // Only bind if validation passes
 }
+
+/*
+ <div class="col-12 text-danger">
+     <asp:Label ID="lblValidationError" runat="server" Visible="false" />
+ </div>
+*/
