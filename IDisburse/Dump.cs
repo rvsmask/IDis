@@ -34,3 +34,40 @@ protected void Page_Load(object sender, EventArgs e)
 
     ClientScript.RegisterStartupScript(this.GetType(), "ShowHideDiv", script);
 }
+//-------------23--------------
+
+    protected void btnFilter_Click(object sender, EventArgs e)
+{
+    lblValidationError.Visible = false;
+
+    string fromDateText = txtFromDate.Text.Trim();
+    string toDateText = txtToDate.Text.Trim();
+
+    DateTime fromDate, toDate;
+
+    bool fromValid = DateTime.TryParse(fromDateText, out fromDate);
+    bool toValid = DateTime.TryParse(toDateText, out toDate);
+
+    if (!string.IsNullOrEmpty(fromDateText) && !fromValid)
+    {
+        lblValidationError.Text = "Please enter a valid 'From Date'.";
+        lblValidationError.Visible = true;
+        return;
+    }
+
+    if (!string.IsNullOrEmpty(toDateText) && !toValid)
+    {
+        lblValidationError.Text = "Please enter a valid 'To Date'.";
+        lblValidationError.Visible = true;
+        return;
+    }
+
+    if (fromValid && toValid && fromDate > toDate)
+    {
+        lblValidationError.Text = "'From Date' cannot be after 'To Date'.";
+        lblValidationError.Visible = true;
+        return;
+    }
+
+    BindGrid(); // Only bind if validation passes
+}
