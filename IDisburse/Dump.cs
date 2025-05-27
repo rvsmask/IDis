@@ -77,3 +77,20 @@ protected void Page_Load(object sender, EventArgs e)
      <asp:Label ID="lblValidationError" runat="server" Visible="false" />
  </div>
 */
+----------------------
+
+      <div class="col-md-3">
+      <asp:Label ID="lblDepartment" runat="server" Text="Department" CssClass="form-label" />
+      <asp:DropDownList ID="ddlDepartment" runat="server" AutoPostBack="true"
+          OnSelectedIndexChanged="ddlDepartment_SelectedIndexChanged" CssClass="form-select">
+          <asp:ListItem Text="All" Value="" />
+          <asp:ListItem Text="IT" Value="IT" />
+          <asp:ListItem Text="HR" Value="HR" />
+          <asp:ListItem Text="Finance" Value="Finance" />
+      </asp:DropDownList>
+  </div>
+
+           protected void ddlDepartment_SelectedIndexChanged(object sender, EventArgs e)
+ {
+     BindGrid();
+ }
