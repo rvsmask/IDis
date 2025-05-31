@@ -94,3 +94,38 @@ protected void Page_Load(object sender, EventArgs e)
  {
      BindGrid();
  }
+//=========================
+protected void btnSearch_Click(object sender, EventArgs e)
+{
+    DateTime fromDate, toDate;
+
+    // Validate dates
+    if (!DateTime.TryParse(txtFromDate.Text, out fromDate))
+    {
+        lblError.Text = "Invalid From Date.";
+        return;
+    }
+
+    if (!DateTime.TryParse(txtToDate.Text, out toDate))
+    {
+        lblError.Text = "Invalid To Date.";
+        return;
+    }
+
+    if (fromDate > toDate)
+    {
+        lblError.Text = "From Date must be earlier than or equal to To Date.";
+        return;
+    }
+
+    lblError.Text = ""; // Clear errors
+
+    // Sample DataSource - Replace with actual data retrieval
+    DataTable dt = GetSampleData(); // Your method to get data
+    DataView dv = new DataView(dt);
+
+    dv.RowFilter = $"DateColumn >= #{fromDate:MM/dd/yyyy}# AND DateColumn <= #{toDate:MM/dd/yyyy}#";
+
+    gvData.DataSource = dv;
+    gvData.DataBind();
+}
