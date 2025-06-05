@@ -1,0 +1,60 @@
+ protected void btnUpload_Click(object sender, EventArgs e)
+ {
+     if (FileUpload1.HasFile)
+     {
+         string csvContent = new StreamReader(FileUpload1.PostedFile.InputStream).ReadToEnd();
+         var tables = SplitCSVIntoTables(csvContent);
+
+         DataTable table1 = tables.Item1;
+         DataTable table2 = tables.Item2;
+
+         // Example: bind to gridviews or use as needed
+         // GridView1.DataSource = table1;
+         // GridView1.DataBind();
+         // GridView2.DataSource = table2;
+         // GridView2.DataBind();
+     }
+ }
+
+ private Tuple<DataTable, DataTable> SplitCSVIntoTables(string content)
+ {
+     var lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+     List<string> section1 = new List<string>();
+     List<string> section2 = new List<string>();
+
+     bool foundSecond = false;
+     foreach (var line in lines)
+     {
+         if (!foundSecond && string.IsNullOrWhiteSpace(line)) // assuming empty line separates sections
+         {
+             foundSecond = true;
+             continue;
+         }
+
+         if (!foundSecond)
+             section1.Add(line);
+         else
+             section2.Add(line);
+     }
+
+     return Tuple.Create(ParseCSV(section1), ParseCSV(section2));
+ }
+
+ private DataTable ParseCSV(List<string> lines)
+ {
+     DataTable dt = new DataTable();
+     if (lines.Count == 0) return dt;
+
+     string[] headers = lines[0].Split(',');
+     foreach (string header in headers)
+         dt.Columns.Add(header.Trim());
+
+     for (int i = 1; i < lines.Count; i++)
+     {
+         if (string.IsNullOrWhiteSpace(lines[i])) continue;
+         string[] fields = lines[i].Split(',');
+         dt.Rows.Add(fields);
+     }
+
+     return dt;
+ }
