@@ -58,3 +58,18 @@
 
      return dt;
  }
+-----------
+
+static void Main()
+    {
+        string data = "ID|Name|Age\n1|Alice|30\n2|Bob|25\n3|Charlie|28";
+        
+        // Replace '|' with ',' to convert to CSV format
+        string csvData = data.Replace("|", ",");
+
+        // Save to file
+        string filePath = @"C:\temp\output.csv"; // Ensure directory exists
+        File.WriteAllText(filePath, csvData);
+
+        Console.WriteLine("CSV file created at: " + filePath);
+    }
