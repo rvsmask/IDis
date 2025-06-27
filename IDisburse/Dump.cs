@@ -1,131 +1,50 @@
-<asp:HiddenField ID="hfIsVisible" runat="server" />
+<!-- Bootstrap 4 or 5 (choose one) -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<div id="myDiv" style="display: none;">
-    This is a sample div.
+  <ItemTemplate>
+                <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete"
+                    CommandArgument='<%# Eval("ID") %>'
+                    CssClass="btn btn-danger btn-sm"
+                    OnClientClick="openConfirmModal(this); return false;" />
+            </ItemTemplate>
+
+                    -------------
+
+                    <!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalLabel">Confirm Delete</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this item?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="performDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
 </div>
 
+--------------
+
 <script type="text/javascript">
-    window.onload = function () {
-        var isVisible = document.getElementById('<%= hfIsVisible.ClientID %>').value;
+    var clickedButton = null;
 
-        var div = document.getElementById('myDiv');
-        if (isVisible === "true") {
-            div.style.display = "block";
-        } else {
-            div.style.display = "none";
-        }
-    };
+    function openConfirmModal(btn) {
+        clickedButton = btn; // store button for later
+        $('#deleteModal').modal('show');
+    }
+
+    function performDelete() {
+        $('#deleteModal').modal('hide');
+        __doPostBack(clickedButton.name, '');
+    }
 </script>
-
-protected void Page_Load(object sender, EventArgs e)
-{
-    // Your server-side condition
-    bool isVisible = SomeCondition(); // e.g., check session, database, etc.
-
-    hfIsVisible.Value = isVisible.ToString().ToLower(); // "true" or "false"
-}
-
-protected void Page_Load(object sender, EventArgs e)
-{
-    bool isVisible = SomeCondition();
-
-    string script = $"<script>window.onload = function() {{ " +
-                    $"document.getElementById('myDiv').style.display = '{(isVisible ? "block" : "none")}'; }};</script>";
-
-    ClientScript.RegisterStartupScript(this.GetType(), "ShowHideDiv", script);
-}
-//-------------23--------------
-
-    protected void btnFilter_Click(object sender, EventArgs e)
-{
-    lblValidationError.Visible = false;
-
-    string fromDateText = txtFromDate.Text.Trim();
-    string toDateText = txtToDate.Text.Trim();
-
-    DateTime fromDate, toDate;
-
-    bool fromValid = DateTime.TryParse(fromDateText, out fromDate);
-    bool toValid = DateTime.TryParse(toDateText, out toDate);
-
-    if (!string.IsNullOrEmpty(fromDateText) && !fromValid)
-    {
-        lblValidationError.Text = "Please enter a valid 'From Date'.";
-        lblValidationError.Visible = true;
-        return;
-    }
-
-    if (!string.IsNullOrEmpty(toDateText) && !toValid)
-    {
-        lblValidationError.Text = "Please enter a valid 'To Date'.";
-        lblValidationError.Visible = true;
-        return;
-    }
-
-    if (fromValid && toValid && fromDate > toDate)
-    {
-        lblValidationError.Text = "'From Date' cannot be after 'To Date'.";
-        lblValidationError.Visible = true;
-        return;
-    }
-
-    BindGrid(); // Only bind if validation passes
-}
-
-/*
- <div class="col-12 text-danger">
-     <asp:Label ID="lblValidationError" runat="server" Visible="false" />
- </div>
-*/
-----------------------
-
-      <div class="col-md-3">
-      <asp:Label ID="lblDepartment" runat="server" Text="Department" CssClass="form-label" />
-      <asp:DropDownList ID="ddlDepartment" runat="server" AutoPostBack="true"
-          OnSelectedIndexChanged="ddlDepartment_SelectedIndexChanged" CssClass="form-select">
-          <asp:ListItem Text="All" Value="" />
-          <asp:ListItem Text="IT" Value="IT" />
-          <asp:ListItem Text="HR" Value="HR" />
-          <asp:ListItem Text="Finance" Value="Finance" />
-      </asp:DropDownList>
-  </div>
-
-           protected void ddlDepartment_SelectedIndexChanged(object sender, EventArgs e)
- {
-     BindGrid();
- }
-//=========================
-protected void btnSearch_Click(object sender, EventArgs e)
-{
-    DateTime fromDate, toDate;
-
-    // Validate dates
-    if (!DateTime.TryParse(txtFromDate.Text, out fromDate))
-    {
-        lblError.Text = "Invalid From Date.";
-        return;
-    }
-
-    if (!DateTime.TryParse(txtToDate.Text, out toDate))
-    {
-        lblError.Text = "Invalid To Date.";
-        return;
-    }
-
-    if (fromDate > toDate)
-    {
-        lblError.Text = "From Date must be earlier than or equal to To Date.";
-        return;
-    }
-
-    lblError.Text = ""; // Clear errors
-
-    // Sample DataSource - Replace with actual data retrieval
-    DataTable dt = GetSampleData(); // Your method to get data
-    DataView dv = new DataView(dt);
-
-    dv.RowFilter = $"DateColumn >= #{fromDate:MM/dd/yyyy}# AND DateColumn <= #{toDate:MM/dd/yyyy}#";
-
-    gvData.DataSource = dv;
-    gvData.DataBind();
-}
