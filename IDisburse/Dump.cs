@@ -1,237 +1,228 @@
-<!-- Bootstrap 4 or 5 (choose one) -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="WebForm2.aspx.cs" Inherits="WebApplication5.WebForm2" %>
+ 
+<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
-  <ItemTemplate>
-                <asp:Button ID="btnDelete" runat="server" Text="Delete" CommandName="Delete"
-                    CommandArgument='<%# Eval("ID") %>'
-                    CssClass="btn btn-danger btn-sm"
-                    OnClientClick="openConfirmModal(this); return false;" />
-            </ItemTemplate>
+      
+        <asp:UpdatePanel ID="updpMain" runat="server" UpdateMode="Conditional">
+            <ContentTemplate>
+                <div class="container mt-4">
+                    <h2>Workday Black Knight Map</h2>
 
-                    -------------
-
-                    <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="modalLabel">Confirm Delete</h5>
-        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to delete this item?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-danger" onclick="performDelete()">Delete</button>
-      </div>
-    </div>
-  </div>
-</div>
-
---------------
-
-<script type="text/javascript">
-    var clickedButton = null;
-
-    function openConfirmModal(btn) {
-        clickedButton = btn; // store button for later
-        $('#deleteModal').modal('show');
-    }
-
-    function performDelete() {
-        $('#deleteModal').modal('hide');
-        __doPostBack(clickedButton.name, '');
-    }
-</script>
-
------------------
-
-<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Default.aspx.cs" Inherits="_Default" %>
-
-<!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title>Delete Confirmation Modal Demo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-</head>
-<body>
-    <form id="form1" runat="server">
-        <asp:ScriptManager ID="ScriptManager1" runat="server" />
-
-        <div class="container mt-5">
-            <asp:ListView ID="ListView1" runat="server" DataKeyNames="ID">
-                <ItemTemplate>
-                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                        <span><%# Eval("Name") %></span>
-                        <asp:LinkButton ID="LinkButtonDelete" runat="server" CssClass="btn btn-danger btn-sm delete-btn"
-                            CommandName="Delete" CommandArgument='<%# Eval("ID") %>'>
-                            Delete
-                        </asp:LinkButton>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="drpGroup">Group:</label>
+                            <asp:DropDownList ID="drpGroup" runat="server" CssClass="form-control" />
+                        </div>
+                        <div class="col-md-4 mt-4">
+                            <asp:Button ID="btnGetRecords" runat="server" CssClass="btn btn-primary" Text="Get Records" OnClick="btnGetRecords_Click" />
+                        </div>
                     </div>
-                </ItemTemplate>
-            </asp:ListView>
-        </div>
 
-        <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <asp:ListView ID="Records" runat="server" OnItemCommand="Records_ItemCommand"  OnItemDeleting="Records_ItemDeleting">
+                        <LayoutTemplate>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Group</th>
+                                        <th>Field</th>
+                                        <th>Transaction</th>
+                                        <th>Investor</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr runat="server" id="itemPlaceholder"></tr>
+                                </tbody>
+                            </table>
+                        </LayoutTemplate>
+                        <ItemTemplate>
+                            <tr>
+                                <td><%# Eval("MPGROUP") %></td>
+                                <td><%# Eval("MPFIELD") %></td>
+                                <td><%# Eval("MPTRAN") %></td>
+                                <td><%# Eval("MPITVN") %></td>
+                                <td>
+                               <asp:LinkButton ID="LinkButton2" runat="server" CssClass="btn btn-danger btn-sm realDelete" UseSubmitBehavior="false"
+    CommandName="MyDelete"
+    CommandArgument='<%# Eval("MPGROUP") + "," + Eval("MPFIELD") + "," + Eval("MPTRAN") + "," + Eval("MPITVN") %>'
+    OnClientClick="return openConfirmModal(this);">
+    Delete
+</asp:LinkButton>
+
+                                 </td>
+                            </tr>
+                        </ItemTemplate>
+                    </asp:ListView>
+                </div>
+            </ContentTemplate>
+            <Triggers>
+    <asp:AsyncPostBackTrigger ControlID="Records" EventName="ItemCommand" />
+</Triggers>
+        </asp:UpdatePanel>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="modalLabel">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         Are you sure you want to delete this item?
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                        <button type="button" class="btn btn-danger" onclick="performDelete()">Delete</button>
                     </div>
                 </div>
             </div>
         </div>
-    </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            var targetBtn = null;
+     <script type="text/javascript">
+         var $realDeleteButton = null;
+         var skipConfirm = false;
 
-            document.querySelectorAll('.delete-btn').forEach(function (btn) {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    targetBtn = btn;
-                    var modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                    modal.show();
-                });
-            });
+         function openConfirmModal(btn) {
+             if (skipConfirm) {
+                 // Allow postback
+                 skipConfirm = false;
+                 return true;
+             }
+             $realDeleteButton = $(btn);
+             $('#deleteModal').modal('show');
+             return false;
+         }
 
-            document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-                if (targetBtn) {
-                    __doPostBack(targetBtn.name, '');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+         function performDelete() {
+             $('#deleteModal').modal('hide');
+             setTimeout(function () {
+                 if ($realDeleteButton && $realDeleteButton.length) {
+                     skipConfirm = true;
+                     $realDeleteButton[0].click(); // Now OnClientClick will return true, allowing postback
+                 }
+             }, 200);
+         }
 
+
+     </script>
+
+   
+</asp:Content>
+-----------------------------------------
 -----------------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------------------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 
-<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Default.aspx.cs" Inherits="_Default" %>
-
-<!DOCTYPE html>
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head runat="server">
-    <title>Delete Confirmation Modal Demo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-</head>
-<body>
-    <form id="form1" runat="server">
-        <asp:ScriptManager ID="ScriptManager1" runat="server" />
-
-        <div class="container mt-5">
-            <asp:ListView ID="ListView1" runat="server" DataKeyNames="ID">
-                <ItemTemplate>
-                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                        <span><%# Eval("Name") %></span>
-                        <asp:LinkButton ID="LinkButtonDelete" runat="server" CssClass="btn btn-danger btn-sm delete-btn"
-                            CommandName="Delete" CommandArgument='<%# Eval("ID") %>'>
-                            Delete
-                        </asp:LinkButton>
-                    </div>
-                </ItemTemplate>
-            </asp:ListView>
-        </div>
-
-        <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to delete this item?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            var targetBtn = null;
-
-            document.querySelectorAll('.delete-btn').forEach(function (btn) {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    targetBtn = btn;
-                    var modal = new bootstrap.modal(document.getElementById('deleteModal'));
-                    modal.show();
-                });
-            });
-
-            document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-                if (targetBtn) {
-                    __doPostBack(targetBtn.name, '');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
------------------
-
-public partial class _Default : Page
+namespace WebApplication5
 {
-    private static List<Item> Items = new List<Item>
+    public partial class WebForm2 : System.Web.UI.Page
     {
-        new Item { ID = 1, Name = "Item 1" },
-        new Item { ID = 2, Name = "Item 2" },
-        new Item { ID = 3, Name = "Item 3" }
+        public class Record
+        {
+            public string MPGROUP { get; set; }
+            public string MPFIELD { get; set; }
+            public string MPTRAN { get; set; }
+            public string MPITVN { get; set; }
+        }
+
+        private static List<Record> _data = new List<Record>
+    {
+        // GroupA
+        new Record { MPGROUP = "GroupA", MPFIELD = "Field1", MPTRAN = "Tran1", MPITVN = "Investor1" },
+        new Record { MPGROUP = "GroupA", MPFIELD = "Field2", MPTRAN = "Tran2", MPITVN = "Investor2" },
+        new Record { MPGROUP = "GroupA", MPFIELD = "Field3", MPTRAN = "Tran3", MPITVN = "Investor3" },
+        new Record { MPGROUP = "GroupA", MPFIELD = "Field4", MPTRAN = "Tran4", MPITVN = "Investor4" },
+
+        // GroupB
+        new Record { MPGROUP = "GroupB", MPFIELD = "Field5", MPTRAN = "Tran5", MPITVN = "Investor5" },
+        new Record { MPGROUP = "GroupB", MPFIELD = "Field6", MPTRAN = "Tran6", MPITVN = "Investor6" },
+        new Record { MPGROUP = "GroupB", MPFIELD = "Field7", MPTRAN = "Tran7", MPITVN = "Investor7" },
+        new Record { MPGROUP = "GroupB", MPFIELD = "Field8", MPTRAN = "Tran8", MPITVN = "Investor8" },
+
+        // GroupC
+        new Record { MPGROUP = "GroupC", MPFIELD = "Field9",  MPTRAN = "Tran9",  MPITVN = "Investor9" },
+        new Record { MPGROUP = "GroupC", MPFIELD = "Field10", MPTRAN = "Tran10", MPITVN = "Investor10" },
+        new Record { MPGROUP = "GroupC", MPFIELD = "Field11", MPTRAN = "Tran11", MPITVN = "Investor11" },
+        new Record { MPGROUP = "GroupC", MPFIELD = "Field12", MPTRAN = "Tran12", MPITVN = "Investor12" }
     };
 
-    protected void Page_Load(object sender, EventArgs e)
-    {
-        if (!IsPostBack)
+        protected void Page_Load(object sender, EventArgs e)
         {
-            BindList();
+            if (!IsPostBack)
+            {
+                drpGroup.DataSource = new List<string> { "All", "GroupA", "GroupB", "GroupC" };
+                drpGroup.DataBind();
+                drpGroup.SelectedValue = "All";
+                BindListView(_data);
+            }
         }
-    }
 
-    private void BindList()
-    {
-        ListView1.DataSource = Items;
-        ListView1.DataBind();
-    }
-
-    protected void ListView1_ItemCommand(object sender, ListViewCommandEventArgs e)
-    {
-        if (e.CommandName == "Delete")
+        protected void btnGetRecords_Click(object sender, EventArgs e)
         {
-            int id = Convert.ToInt32(e.CommandArgument);
-            Items.RemoveAll(i => i.ID == id);
-            BindList();
+            string selectedGroup = drpGroup.SelectedValue;
+            List<Record> filtered = selectedGroup == "All"
+                ? _data
+                : _data.FindAll(r => r.MPGROUP == selectedGroup);
+            BindListView(filtered);
         }
-    }
 
-    public class Item
-    {
-        public int ID { get; set; }
-        public string Name { get; set; }
+        private void BindListView(List<Record> records)
+        {
+            Records.DataSource = records;
+            Records.DataBind();
+        }
+
+        protected void Records_ItemDeleting(object sender, ListViewDeleteEventArgs e)
+        {
+            // Prevent default delete behavior, since you handle it in ItemCommand
+            e.Cancel = true;
+        }
+
+        protected void Records_ItemCommand(object sender, ListViewCommandEventArgs e)
+        {
+            try
+            {
+                if (e.CommandName == "MyDelete")
+                {
+                    string[] keys = e.CommandArgument.ToString().Split(',');
+                    if (keys.Length == 4)
+                    {
+                        string group = keys[0];
+                        string field = keys[1];
+                        string tran = keys[2];
+                        string itvn = keys[3];
+
+                        _data.RemoveAll(r => r.MPGROUP == group && r.MPFIELD == field && r.MPTRAN == tran && r.MPITVN == itvn);
+                    }
+
+                    btnGetRecords_Click(null, null); // Refresh list with filter
+                    updpMain.Update(); // Update the UI
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+
+        }
+
+        protected void Records_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
+
+===================================================
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
